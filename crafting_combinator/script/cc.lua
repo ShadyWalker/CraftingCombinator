@@ -1,3 +1,6 @@
+-- todo: 
+-- 	update routine at function _M:read_all_recipes to output signals for all current recipes for currently connected assembler.
+
 local util = require 'script.util'
 local gui = require 'script.gui'
 local settings_parser = require 'script.settings-parser'
@@ -10,7 +13,7 @@ local _M = {}
 local combinator_mt = {__index = _M}
 
 
-local CHEST_POSITION_NAMES = {'behind', 'left', 'right', 'behind-left', 'behind-right'}
+local CHEST_POSITION_NAMES = {'behind', 'left', 'right', 'behind-left', 'behind-right', 'forward-left', 'forward-right'}
 local CHEST_POSITIONS = {}; for key, name in pairs(CHEST_POSITION_NAMES) do CHEST_POSITIONS[name] = key; end
 local CHEST_DIRECTIONS = {
 	[CHEST_POSITIONS.behind] = 180,
@@ -18,6 +21,8 @@ local CHEST_DIRECTIONS = {
 	[CHEST_POSITIONS.left] = -90,
 	[CHEST_POSITIONS['behind-right']] = 135,
 	[CHEST_POSITIONS['behind-left']] = -135,
+	[CHEST_POSITIONS['forward-right']] = 45,
+	[CHEST_POSITIONS['forward-left']] = -45,
 }
 
 local STATUS_SIGNALS = {}
@@ -36,6 +41,7 @@ _M.settings_parser = settings_parser {
 	empty_inserters = {'i', 'bool'},
 	craft_until_zero = {'z', 'bool'},
 	read_recipe = {'r', 'bool'},
+	read_all_recipes = {'a', 'bool'},
 	read_speed = {'s', 'bool'},
 	read_machine_status = {'st', 'bool'},
 }
@@ -193,6 +199,7 @@ function _M:update()
 			if self.settings.read_recipe then self:read_recipe(params); end
 			if self.settings.read_speed then self:read_speed(params); end
 			if self.settings.read_machine_status then self:read_machine_status(params); end
+            		if self.settings.read_all_recipes then self:read_all_recipes(params); end
 		end
 	end
 	
@@ -219,6 +226,7 @@ function _M:open(player_index)
 			gui.checkbox('empty-inserters', self.settings.empty_inserters),
 			gui.checkbox('craft-until-zero', self.settings.craft_until_zero, {tooltip = true}),
 			gui.checkbox('read-recipe', self.settings.read_recipe),
+			gui.checkbox('read-all-recipes', self.settings.read_all-recipes),
 			gui.checkbox('read-speed', self.settings.read_speed),
 			gui.checkbox('read-machine-status', self.settings.read_machine_status),
 		}
@@ -238,7 +246,11 @@ function _M:on_checked_changed(name, state, element)
 			end
 		end
 	end
-	if category == 'misc' then self.settings[name] = state; end
+	if category == 'misc' then 
+		self.settings[name] = state
+		if [name] == 'read-all-recipes' then self.settings['read-recipe'] = false; end
+		if [name] == 'read-recipe' then self.settings['read-all-recipes'] = false; end
+	end
 	if name == 'craft_until_zero' and self.settings.craft_until_zero then
 		self.last_recipe = nil
 	end
@@ -256,6 +268,7 @@ function _M:update_disabled_checkboxes(root)
 	self:disable_checkbox(root, 'misc:read-recipe', 'r')
 	self:disable_checkbox(root, 'misc:read-speed', 'r')
 	self:disable_checkbox(root, 'misc:read-machine-status', 'r')
+	self:disable_checkbox(root, 'misc:read-all-recipes', 'r')
 end
 
 function _M:disable_checkbox(root, name, mode)
@@ -288,6 +301,23 @@ function _M:read_recipe(params)
 			count = 1,
 			index = 1,
 		})
+	end
+end
+
+function _M:read_all_recipes(params)
+	if self.assembler then
+		--valid assembler is connected
+		local results = {}
+-- 		for name, recipe in pairs(entity.force.recipes) do
+-- 			for _, product in pairs(recipe[mode]) do
+-- 				if product.name == highest.signal.name and product.type == highest.signal.type then
+-- 					local amount = tonumber(product.amount or product.amount_min or product.amount_max) or 1
+-- 					amount = amount * (tonumber(product.probability) or 1)
+-- 					table.insert(results, {recipe = recipe, amount = amount})
+-- 					break
+-- 				end
+-- 			end
+-- 		end
 	end
 end
 
