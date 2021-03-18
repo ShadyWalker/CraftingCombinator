@@ -125,6 +125,13 @@ function _M.entity(entity, specs)
 			build_list(self.title_elements, title_container)
 		end
 		
+-- 		Attempt to add close buttons to mod GUIs
+		title.add {
+			type = "button", 
+			name = "button-close_gui", 
+			style = "closebutton",
+		}
+		
 		build_list(self, main)
 		
 		return main
